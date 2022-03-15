@@ -35,7 +35,7 @@ public class DownloadPhoto implements Runnable {
             pw.print("Connection: keep-alive\r\n");
             pw.print("Accept-Language: ro,en\r\n");
             pw.print("DNT: 1\r\n");
-            pw.print("Save-Data: <sd-token>\r\n");
+            pw.print("Save-Data: on\r\n");
             pw.print("\r\n");
             pw.flush();
 
@@ -55,14 +55,14 @@ public class DownloadPhoto implements Runnable {
 
 
 // Header end flag.
-            boolean headerEnded = false;//
+            boolean isHeaderEnded = false;//
 
             byte[] bytes = new byte[2048];
             int length;
 
             while ((length = inputStream.read(bytes)) != -1) {
                 // If the end of the header had already been reached, write the bytes to the file as normal.
-                if (headerEnded)
+                if (isHeaderEnded)
                     fileOutputStream.write(bytes, 0, length);
 
                     // This locates the end of the header by comparing the current byte as well as the next 3 bytes
@@ -72,7 +72,7 @@ public class DownloadPhoto implements Runnable {
                 else {
                     for (int i = 0; i < 2048; i++) {
                         if (bytes[i] == 13 && bytes[i + 1] == 10 && bytes[i + 2] == 13 && bytes[i + 3] == 10) {
-                            headerEnded = true;
+                            isHeaderEnded = true;
                             fileOutputStream.write(bytes, i + 4, 2048 - i - 4);
                             break;
                         }

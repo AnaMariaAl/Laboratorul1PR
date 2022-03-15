@@ -26,9 +26,9 @@ public class Main {
             int port = 80;
 
             Socket socket = new Socket(host, port);
-            String response = sendGetRequest(socket,host);
+            String response = sendRequest(socket,host);
             Set<String> photos = extractLinks(response);
-            startDownload(photos,port, host);
+            download(photos,port, host);
 
 
         } else if (answer.equals("b")) {
@@ -38,34 +38,35 @@ public class Main {
             SSLSocketFactory sslSocketFactory = (SSLSocketFactory) SSLSocketFactory.getDefault();
 
             SSLSocket sslSocket = (SSLSocket) sslSocketFactory.createSocket(host, port);
-            String response = sendGetRequest(sslSocket, host);
+            String response = sendRequest(sslSocket, host);
 
-            Set<String> photos = extractLinks (response);
+            Set<String> photos = extractLinks(response);
+            download(photos,port, host);
 
-            startDownload( photos,port, host);
-
+        } else{
+            System.out.println("Optiune incorecta!");
         }
 
     }
 
-    private static void startDownload(Set<String> allPhotosLinks,int port , String host) {
+    private static void download(Set<String> allPhotos,int port , String host) {
         ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(4);
         final Semaphore semaphore = new Semaphore(2);
 
-        List<Runnable> taskList = new LinkedList<>();
+        List<Runnable> tasks = new LinkedList<>();
 
-        for (String link : allPhotosLinks) {
+        for (String photo : allPhotos) {
 
-            Runnable task = new DownloadPhoto(link, semaphore, port, host);
-            taskList.add(task);
+            Runnable task = new DownloadPhoto(photo, semaphore, port, host);
+            tasks.add(task);
         }
 
-        for (Runnable task : taskList) {
+        for (Runnable task : tasks) {
             executor.execute(task);
         }
         executor.shutdown();
 
-        printFinalMessage(executor);
+        showMessage(executor);
 
     }
 
@@ -97,7 +98,7 @@ public class Main {
         return allPhotosLinks;
     }
 
-    public static void printFinalMessage(ThreadPoolExecutor executor) {
+    public static void showMessage(ThreadPoolExecutor executor) {
         try {
             if (executor.awaitTermination(3, TimeUnit.MINUTES)) {
                 System.out.println("\n  S-a descarcat cu succes");
@@ -109,24 +110,24 @@ public class Main {
         }
     }
 
-    public static String sendGetRequest(Socket socket, String host) throws IOException {
+    public static String sendRequest(Socket socket, String host) throws IOException {
             PrintWriter printWriter = new PrintWriter(socket.getOutputStream());
-
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         String response = "";
-        String outStr;
+        String output = "";
         printWriter.print("GET / HTTP/1.1\r\n");
         printWriter.print("Host: " + host + "\r\n");
         printWriter.print("Connection: keep-alive\r\n");
         printWriter.print("Accept-Language: ro,en\r\n");
         printWriter.print("DNT: 1\r\n");
+//        printWriter.print("Save-Data: on\r\n");
         printWriter.print("Save-Data: <sd-token>\r\n");
         printWriter.print("\r\n");
         printWriter.flush();
         // printWritter transmite date in socket
 
-        while((outStr = bufferedReader.readLine()) != null){
-            response += outStr + "\n";
+        while((output = bufferedReader.readLine()) != null){
+            response += output + "\n";
         }
         socket.shutdownInput();
         bufferedReader.close();
