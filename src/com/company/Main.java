@@ -120,11 +120,9 @@ public class Main {
         printWriter.print("Connection: keep-alive\r\n");
         printWriter.print("Accept-Language: ro,en\r\n");
         printWriter.print("DNT: 1\r\n");
-//        printWriter.print("Save-Data: on\r\n");
         printWriter.print("Save-Data: <sd-token>\r\n");
         printWriter.print("\r\n");
         printWriter.flush();
-        // printWritter transmite date in socket
 
         while((output = bufferedReader.readLine()) != null){
             response += output + "\n";

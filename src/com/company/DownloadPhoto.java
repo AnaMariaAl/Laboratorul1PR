@@ -61,13 +61,13 @@ public class DownloadPhoto implements Runnable {
             int length;
 
             while ((length = inputStream.read(bytes)) != -1) {
-                // If the end of the header had already been reached, write the bytes to the file as normal.
-                if (isHeaderEnded)
+                // Dacă sfârșitul antetului a fost deja atins, scriem octeții în fișier ca de obicei.
+
                     fileOutputStream.write(bytes, 0, length);
 
-                    // This locates the end of the header by comparing the current byte as well as the next 3 bytes
-                    // with the HTTP header end "\r\n\r\n" (which in integer representation would be 13 10 13 10).
-                    // If the end of the header is reached, the flag is set to true and the remaining data in the
+                    // Aceasta localizează sfârșitul antetului comparând octetul curent și următorii 3 octeți
+                    // cu sfârșitul antetului HTTP „\r\n\r\n” care în reprezentarea întregului ar fi 13 10 13 10.
+                    // Dacă se ajunge la sfârșitul antetului, indicatorul este setat la adevărat și datele rămase în
                     // currently buffered byte array is written into the file.
                 else {
                     for (int i = 0; i < 2048; i++) {
